@@ -35,56 +35,65 @@ jobs:
     name: 2. Migrate Neon Postgres Database
     needs: verify
     runs-on: ubuntu-latest
-    if: ${{ secrets.DATABASE_URL != '' }}
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      EMBEDDING_API_KEY: ${{ secrets.EMBEDDING_API_KEY || 'ci-migrate-placeholder' }}
+      LLM_API_KEY: ${{ secrets.LLM_API_KEY || 'ci-migrate-placeholder' }}
     steps:
       - name: Checkout repository
+        if: env.DATABASE_URL != ''
         uses: actions/checkout@v4
 
       - name: Setup Node.js 20
+        if: env.DATABASE_URL != ''
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
       - name: Install dependencies
+        if: env.DATABASE_URL != ''
         run: npm ci
 
       - name: Run database migrations
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-          EMBEDDING_API_KEY: ${{ secrets.EMBEDDING_API_KEY || 'ci-migrate-placeholder' }}
-          LLM_API_KEY: ${{ secrets.LLM_API_KEY || 'ci-migrate-placeholder' }}
+        if: env.DATABASE_URL != ''
         run: npx tsx src/server/db/migrate.ts
 
   deploy-vercel:
     name: 3. Deploy to Vercel Production
     needs: [verify, migrate]
-    if: ${{ always() && needs.verify.result == 'success' && (needs.migrate.result == 'success' || needs.migrate.result == 'skipped') && secrets.VERCEL_TOKEN != '' }}
     runs-on: ubuntu-latest
     env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
     steps:
       - name: Checkout repository
+        if: env.VERCEL_TOKEN != ''
         uses: actions/checkout@v4
 
       - name: Setup Node.js 20
+        if: env.VERCEL_TOKEN != ''
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
 
       - name: Install Vercel CLI
+        if: env.VERCEL_TOKEN != ''
         run: npm install --global vercel@latest
 
       - name: Pull Vercel Environment Information
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+        if: env.VERCEL_TOKEN != ''
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
 
       - name: Build Project Artifacts
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+        if: env.VERCEL_TOKEN != ''
+        run: vercel build --prod --token="$VERCEL_TOKEN"
 
       - name: Deploy Project Artifacts to Vercel
-        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        if: env.VERCEL_TOKEN != ''
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
 
   publish-docker:
     name: 4. Build & Push Docker Image (GHCR)
