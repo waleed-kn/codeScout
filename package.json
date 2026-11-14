@@ -6,12 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "ci": "npm run lint && npm run typecheck && npm test && npm run build",
     "migrate": "tsx --env-file=.env src/server/db/migrate.ts",
     "db:check": "tsx --env-file=.env src/server/db/check.ts",
-    "try:clients": "tsx --env-file=.env scripts/try-clients.ts"
+    "try:clients": "tsx --env-file=.env scripts/try-clients.ts",
+    "docker:build": "docker build -t codescout:latest .",
+    "docker:up": "docker compose up --build -d",
+    "docker:down": "docker compose down"
   },
   "keywords": [],
   "dependencies": {
