@@ -6,6 +6,11 @@ import { useRouter } from "next/navigation";
 import { ApiError, createRepo, deleteRepo, listRepos } from "@/client/api";
 import type { RepoSummary } from "@/types";
 
+const QUICK_REPOS = [
+  "https://github.com/waleed-kn/weather-app",
+  "https://github.com/sindresorhus/is",
+];
+
 export function RepoManager() {
   const router = useRouter();
   const [url, setUrl] = useState("");
@@ -80,52 +85,104 @@ export function RepoManager() {
 
   return (
     <div className="stack">
-      <section className="panel-card glow-panel">
-        <div className="panel-title-row">
-          <div>
-            <h2 className="panel-title">Index a Public GitHub Repository</h2>
-            <p className="muted">
-              Paste any <code>https://github.com/owner/repo</code> URL to
-              download, chunk, and embed its source code.
-            </p>
+      {/* ─── HIGH-VISIBILITY REPOSITORY UPLOAD / INGESTION CONSOLE ─── */}
+      <section className="upload-spotlight">
+        <div className="upload-spotlight-banner">
+          <div className="upload-banner-left">
+            <span className="upload-pulse-dot" aria-hidden="true" />
+            <span>
+              START HERE // PASTE PUBLIC GITHUB REPOSITORY URL TO UPLOAD &amp;
+              INDEX
+            </span>
           </div>
+          <span className="upload-banner-right">
+            MODULE 01 // INGESTION CONSOLE
+          </span>
         </div>
 
-        <form onSubmit={handleSubmit} className="form">
-          <div className="row">
-            <input
-              type="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://github.com/owner/repo"
-              aria-label="GitHub repository URL"
-              className="input"
-              disabled={submitting}
-              required
-            />
-            <button
-              type="submit"
-              className="btn btn-primary"
-              disabled={submitting}
-            >
-              {submitting ? "Indexing..." : "Index repo"}
-            </button>
+        <div className="upload-spotlight-body">
+          <div className="upload-head-row">
+            <div>
+              <h2 className="upload-title">
+                Index a Public GitHub Repository
+              </h2>
+              <p className="upload-sub">
+                Enter any <code>https://github.com/owner/repo</code> URL below
+                — CodeScout streams, chunks, and embeds the codebase for instant
+                Q&amp;A.
+              </p>
+            </div>
+            <div className="upload-step-pills" aria-hidden="true">
+              <span className="upload-step-pill upload-step-pill-active">
+                1. PASTE URL
+              </span>
+              <span className="upload-step-pill">2. AUTO-INDEX</span>
+              <span className="upload-step-pill">3. ASK &amp; CITE</span>
+            </div>
           </div>
-          {submitError ? (
-            <p className="error" role="alert">
-              {submitError}
-            </p>
-          ) : null}
-        </form>
+
+          <form onSubmit={handleSubmit} className="form">
+            <div className="upload-input-group">
+              <div className="upload-input-wrap">
+                <span className="upload-input-prefix" aria-hidden="true">
+                  GITHUB URL ▸
+                </span>
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://github.com/owner/repo"
+                  aria-label="GitHub repository URL"
+                  className="upload-input"
+                  disabled={submitting}
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                className="btn-upload-cta"
+                disabled={submitting}
+              >
+                {submitting ? "Indexing..." : "Index repo →"}
+              </button>
+            </div>
+
+            <div className="upload-helper-bar">
+              <div className="upload-examples">
+                <span className="upload-example-label">QUICK FILL:</span>
+                {QUICK_REPOS.map((sampleUrl) => (
+                  <button
+                    key={sampleUrl}
+                    type="button"
+                    disabled={submitting}
+                    onClick={() => setUrl(sampleUrl)}
+                    className="upload-example-chip"
+                  >
+                    {sampleUrl.replace("https://github.com/", "")}
+                  </button>
+                ))}
+              </div>
+              <span className="upload-hint">
+                Supports public GitHub repositories up to 50 MB
+              </span>
+            </div>
+
+            {submitError ? (
+              <p className="error" role="alert">
+                {submitError}
+              </p>
+            ) : null}
+          </form>
+        </div>
       </section>
 
+      {/* ─── INDEXED REPOSITORIES ARCHIVE ─── */}
       <section className="panel-card">
-        <div className="section-head">
+        <div className="panel-top-bar">
           <div>
-            <h2>Indexed Repositories</h2>
-            <p className="muted">
-              Select a ready repository to open the Q&amp;A workspace.
-            </p>
+            <span className="index-badge-ink">
+              MODULE 02 // INDEXED REPOSITORIES ({repos.length})
+            </span>
           </div>
           <button
             type="button"
@@ -135,6 +192,14 @@ export function RepoManager() {
           >
             Refresh
           </button>
+        </div>
+
+        <div>
+          <h3 className="panel-title">Indexed Repositories</h3>
+          <p className="muted">
+            Click any ready repository below to open its grounded Q&amp;A
+            workspace.
+          </p>
         </div>
 
         {listError ? (
@@ -147,17 +212,22 @@ export function RepoManager() {
           <p className="muted">Loading repositories...</p>
         ) : repos.length === 0 ? (
           <div className="empty-state">
-            <p>No repositories indexed yet.</p>
+            <p>
+              <strong>No repositories indexed yet.</strong>
+            </p>
             <p className="muted">
-              Paste a GitHub URL above and click <strong>Index repo</strong> to
-              get started.
+              Paste a GitHub URL in the orange spotlight console above and click{" "}
+              <strong>Index repo</strong> to get started.
             </p>
           </div>
         ) : (
           <ul className="repo-list">
-            {repos.map((repo) => (
+            {repos.map((repo, index) => (
               <li key={repo.id} className="repo-row">
                 <div className="repo-info">
+                  <span className="repo-index-num">
+                    [{String(index + 1).padStart(2, "0")}]
+                  </span>
                   <Link href={`/repos/${repo.id}`} className="repo-name">
                     {repo.owner}/{repo.name}
                   </Link>
@@ -173,8 +243,8 @@ export function RepoManager() {
                   </span>
                 </div>
                 <div className="repo-actions">
-                  <Link href={`/repos/${repo.id}`} className="btn btn-ghost">
-                    Open Q&amp;A
+                  <Link href={`/repos/${repo.id}`} className="btn btn-accent">
+                    Open Q&amp;A →
                   </Link>
                   <button
                     type="button"

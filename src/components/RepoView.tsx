@@ -82,7 +82,9 @@ export function RepoView({ id }: { id: string }) {
     setRetrying(true);
     setLoadError(null);
     try {
-      const next = await createRepo(`https://github.com/${repo.owner}/${repo.name}`);
+      const next = await createRepo(
+        `https://github.com/${repo.owner}/${repo.name}`
+      );
       if (next.id !== repo.id) {
         router.push(`/repos/${next.id}`);
       } else {
@@ -103,7 +105,10 @@ export function RepoView({ id }: { id: string }) {
     setAsking(true);
     try {
       const response = await askQuestion(id, trimmed);
-      setTurns((prev) => [...prev, { id: Date.now(), question: trimmed, response }]);
+      setTurns((prev) => [
+        ...prev,
+        { id: Date.now(), question: trimmed, response },
+      ]);
       setQuestion("");
     } catch (err) {
       setAskError(formatApiError(err, "Failed to get an answer."));
@@ -123,14 +128,17 @@ export function RepoView({ id }: { id: string }) {
   if (notFound) {
     return (
       <main className="container">
-        <div className="panel-card stack">
-          <h1>Repo not found</h1>
+        <div className="panel-card">
+          <div className="panel-top-bar">
+            <span className="index-badge">ERROR // 404</span>
+          </div>
+          <h1 className="panel-title">Repo not found</h1>
           <p className="muted">
             This repository does not exist or may have been deleted.
           </p>
           <div>
             <Link href="/" className="btn btn-ghost">
-              Home
+              ← Home
             </Link>
           </div>
         </div>
@@ -141,13 +149,13 @@ export function RepoView({ id }: { id: string }) {
   if (loadError && !repo) {
     return (
       <main className="container">
-        <div className="panel-card stack">
+        <div className="panel-card">
           <p className="error" role="alert">
             {loadError}
           </p>
           <div>
             <Link href="/" className="btn btn-ghost">
-              Home
+              ← Home
             </Link>
           </div>
         </div>
@@ -168,53 +176,69 @@ export function RepoView({ id }: { id: string }) {
   return (
     <main className="container">
       <div className="stack">
-        <header className="panel-card glow-panel repo-header">
-          <div>
-            <div className="eyebrow">INDEXED REPOSITORY WORKSPACE</div>
-            <h1>
-              {repo.owner}/{repo.name}
-            </h1>
-            <div className="repo-meta-line">
-              <span className={`badge badge-${repo.status}`}>
-                <span className="status-dot" aria-hidden="true" />
-                {repo.status}
-              </span>
-              <span className="meta-chip mono">
-                commit @{repo.commitSha.slice(0, 7)}
-              </span>
-              {repo.status === "ready" ? (
-                <span className="meta-chip">
-                  {repo.fileCount} files · {repo.chunkCount} vector chunks
-                </span>
-              ) : null}
-            </div>
+        <header className="panel-card">
+          <div className="panel-top-bar">
+            <span className="index-badge">
+              WORKSPACE // REPOSITORY INTELLIGENCE
+            </span>
+            <span className="mono muted" style={{ fontSize: "0.72rem" }}>
+              ID: {repo.id.slice(0, 8)}
+            </span>
           </div>
-          <div className="repo-actions">
-            <a
-              href={`https://github.com/${repo.owner}/${repo.name}`}
-              target="_blank"
-              rel="noreferrer"
-              className="btn btn-ghost"
-            >
-              View on GitHub ↗
-            </a>
-            <Link href="/" className="btn btn-ghost">
-              Home
-            </Link>
+
+          <div className="repo-header">
+            <div>
+              <h1>
+                {repo.owner}/{repo.name}
+              </h1>
+              <div className="repo-meta-line">
+                <span className={`badge badge-${repo.status}`}>
+                  <span className="status-dot" aria-hidden="true" />
+                  {repo.status}
+                </span>
+                <span className="meta-chip mono">
+                  commit @{repo.commitSha.slice(0, 7)}
+                </span>
+                {repo.status === "ready" ? (
+                  <span className="meta-chip">
+                    {repo.fileCount} files · {repo.chunkCount} vector chunks
+                  </span>
+                ) : null}
+              </div>
+            </div>
+
+            <div className="repo-actions">
+              <a
+                href={`https://github.com/${repo.owner}/${repo.name}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-ghost"
+              >
+                GitHub ↗
+              </a>
+              <Link href="/" className="btn btn-ghost">
+                ← Home
+              </Link>
+            </div>
           </div>
         </header>
 
         {repo.status === "pending" ? (
           <div className="status-box" role="status">
-            <strong>Queued for indexing.</strong> Waiting for worker slot —
-            polling automatically every 2 seconds...
+            <strong>[QUEUED]</strong>
+            <span>
+              Waiting for worker slot — polling automatically every 2 seconds...
+            </span>
           </div>
         ) : null}
 
         {repo.status === "indexing" ? (
           <div className="status-box" role="status">
-            <strong>Indexing in progress.</strong> Downloading tarball,
-            chunking source files, and generating 768-dim embeddings...
+            <strong>[INDEXING]</strong>
+            <span>
+              Streaming repository tarball, chunking source files, and embedding
+              768-D vectors into Neon pgvector...
+            </span>
           </div>
         ) : null}
 
@@ -235,93 +259,115 @@ export function RepoView({ id }: { id: string }) {
         ) : null}
 
         {repo.status === "ready" ? (
-          <section className="panel-card chat-section">
-            <div className="section-head">
-              <div>
-                <h2>Ask CodeScout</h2>
-                <p className="muted">
-                  Answers are generated strictly from retrieved code chunks and
-                  cite exact file paths and line ranges.
-                </p>
+          <section className="upload-spotlight">
+            <div className="upload-spotlight-banner">
+              <div className="upload-banner-left">
+                <span className="upload-pulse-dot" aria-hidden="true" />
+                <span>
+                  INTERROGATION CONSOLE // ASK QUESTIONS ABOUT {repo.owner}/
+                  {repo.name}
+                </span>
               </div>
+              <span className="upload-banner-right">STRICT CITATION MODE</span>
             </div>
 
-            <form onSubmit={handleAsk} className="form">
-              <label htmlFor="question-input" className="sr-only">
-                Ask a question about {repo.owner}/{repo.name}
-              </label>
-              <div className="row">
-                <input
-                  id="question-input"
-                  ref={inputRef}
-                  type="text"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  placeholder="e.g. How does data fetching work in this repo?"
-                  maxLength={500}
-                  disabled={asking}
-                  className="input"
-                  required
-                />
-                <button
-                  type="submit"
-                  disabled={asking || question.trim().length === 0}
-                  className="btn btn-primary"
-                >
-                  {asking ? "Thinking..." : "Ask"}
-                </button>
-              </div>
-              <div className="form-foot">
-                <div className="starter-row">
-                  <span className="muted">Try:</span>
-                  {SAMPLE_QUESTIONS.map((sample) => (
-                    <button
-                      key={sample}
-                      type="button"
-                      disabled={asking}
-                      onClick={() => setQuestion(sample)}
-                      className="starter-pill"
-                    >
-                      {sample}
-                    </button>
-                  ))}
-                </div>
-                <div className="char-count muted">{question.length}/500</div>
-              </div>
-            </form>
-
-            {asking ? (
-              <div className="status-box" role="status">
-                Embedding query, searching pgvector, and generating cited
-                answer...
-              </div>
-            ) : null}
-
-            {askError ? (
-              <p className="error" role="alert">
-                {askError}
-              </p>
-            ) : null}
-
-            {turns.length > 0 ? (
-              <div className="qa-list">
-                {turns.map((turn) => (
-                  <AnswerCard
-                    key={turn.id}
-                    question={turn.question}
-                    response={turn.response}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="empty-state">
-                <p>No questions asked in this session yet.</p>
-                <p className="muted">
-                  Ask a question above or click one of the starter prompts to
-                  inspect cited source chunks.
+            <div className="upload-spotlight-body">
+              <div>
+                <h2 className="upload-title">Ask CodeScout</h2>
+                <p className="upload-sub">
+                  Every response is synthesized strictly from retrieved
+                  repository chunks and cites exact{" "}
+                  <code>filePath:startLine-endLine</code> sources.
                 </p>
               </div>
-            )}
+
+              <form onSubmit={handleAsk} className="form">
+                <label htmlFor="question-input" className="sr-only">
+                  Ask a question about {repo.owner}/{repo.name}
+                </label>
+                <div className="upload-input-group">
+                  <div className="upload-input-wrap">
+                    <span className="upload-input-prefix" aria-hidden="true">
+                      QUESTION ▸
+                    </span>
+                    <input
+                      id="question-input"
+                      ref={inputRef}
+                      type="text"
+                      value={question}
+                      onChange={(e) => setQuestion(e.target.value)}
+                      placeholder="e.g. How does data fetching work in this repo?"
+                      maxLength={500}
+                      disabled={asking}
+                      className="upload-input"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={asking || question.trim().length === 0}
+                    className="btn-upload-cta"
+                  >
+                    {asking ? "Thinking..." : "Ask →"}
+                  </button>
+                </div>
+                <div className="form-foot">
+                  <div className="starter-row">
+                    <span className="upload-example-label">TRY PROMPT:</span>
+                    {SAMPLE_QUESTIONS.map((sample) => (
+                      <button
+                        key={sample}
+                        type="button"
+                        disabled={asking}
+                        onClick={() => setQuestion(sample)}
+                        className="starter-pill"
+                      >
+                        {sample}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="char-count muted">{question.length}/500</div>
+                </div>
+              </form>
+
+              {asking ? (
+                <div className="status-box" role="status">
+                  <strong>[RETRIEVING]</strong>
+                  <span>
+                    Embedding query, searching pgvector HNSW index, and
+                    generating cited answer...
+                  </span>
+                </div>
+              ) : null}
+
+              {askError ? (
+                <p className="error" role="alert">
+                  {askError}
+                </p>
+              ) : null}
+
+              {turns.length > 0 ? (
+                <div className="qa-list">
+                  {turns.map((turn) => (
+                    <AnswerCard
+                      key={turn.id}
+                      question={turn.question}
+                      response={turn.response}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="empty-state">
+                  <p>
+                    <strong>No questions asked in this session yet.</strong>
+                  </p>
+                  <p className="muted">
+                    Type a question above or select a prompt pill to inspect
+                    cited source code chunks.
+                  </p>
+                </div>
+              )}
+            </div>
           </section>
         ) : null}
       </div>
