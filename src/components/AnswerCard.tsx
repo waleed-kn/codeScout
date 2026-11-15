@@ -17,18 +17,12 @@ export function AnswerCard({
 
   return (
     <article className="qa-card">
-      <div className="qa-question-bar">
-        <span className="qa-question">{question}</span>
-        <span className="qa-question-kicker">QUERY // GROUNDED</span>
-      </div>
-
+      <div className="qa-question">{question}</div>
       <div className="qa-answer">{response.answer}</div>
 
       {response.sources.length > 0 ? (
         <div className="sources-wrap">
-          <div className="sources-label">
-            CITED SOURCE CHUNKS (CLICK TO EXPAND EXCERPT):
-          </div>
+          <div className="sources-label">Sources (click to inspect code)</div>
           <div className="chips">
             {response.sources.map((src, idx) => {
               const isOpen = expandedIdx === idx;
@@ -59,7 +53,7 @@ export function AnswerCard({
                   {selectedSource.endLine}
                 </span>
                 <span className="code-header-sim">
-                  SIMILARITY // {selectedSource.similarity.toFixed(3)}
+                  similarity {selectedSource.similarity.toFixed(3)}
                 </span>
               </div>
               <pre className="code-pre">

@@ -15,7 +15,7 @@ interface ChatTurn {
 
 const SAMPLE_QUESTIONS = [
   "What is the main purpose and architecture of this repository?",
-  "Where is the main entry point and how does routing or data fetching work?",
+  "Where is the main entry point and how does data fetching work?",
   "How are errors or edge cases handled in the code?",
 ];
 
@@ -129,16 +129,14 @@ export function RepoView({ id }: { id: string }) {
     return (
       <main className="container">
         <div className="panel-card">
-          <div className="panel-top-bar">
-            <span className="index-badge">ERROR // 404</span>
-          </div>
-          <h1 className="panel-title">Repo not found</h1>
+          <span className="eyebrow-gold">404</span>
+          <h1 className="section-title">Repo not found</h1>
           <p className="muted">
             This repository does not exist or may have been deleted.
           </p>
           <div>
             <Link href="/" className="btn btn-ghost">
-              ← Home
+              ← Back to Home
             </Link>
           </div>
         </div>
@@ -155,7 +153,7 @@ export function RepoView({ id }: { id: string }) {
           </p>
           <div>
             <Link href="/" className="btn btn-ghost">
-              ← Home
+              ← Back to Home
             </Link>
           </div>
         </div>
@@ -175,19 +173,11 @@ export function RepoView({ id }: { id: string }) {
 
   return (
     <main className="container">
-      <div className="stack">
+      <div className="stack" style={{ gap: 28 }}>
         <header className="panel-card">
-          <div className="panel-top-bar">
-            <span className="index-badge">
-              WORKSPACE // REPOSITORY INTELLIGENCE
-            </span>
-            <span className="mono muted" style={{ fontSize: "0.72rem" }}>
-              ID: {repo.id.slice(0, 8)}
-            </span>
-          </div>
-
           <div className="repo-header">
             <div>
+              <span className="eyebrow-gold">Repository Workspace</span>
               <h1>
                 {repo.owner}/{repo.name}
               </h1>
@@ -196,12 +186,12 @@ export function RepoView({ id }: { id: string }) {
                   <span className="status-dot" aria-hidden="true" />
                   {repo.status}
                 </span>
-                <span className="meta-chip mono">
-                  commit @{repo.commitSha.slice(0, 7)}
+                <span className="meta-pill mono">
+                  @{repo.commitSha.slice(0, 7)}
                 </span>
                 {repo.status === "ready" ? (
-                  <span className="meta-chip">
-                    {repo.fileCount} files · {repo.chunkCount} vector chunks
+                  <span className="meta-pill">
+                    {repo.fileCount} files · {repo.chunkCount} chunks
                   </span>
                 ) : null}
               </div>
@@ -214,9 +204,9 @@ export function RepoView({ id }: { id: string }) {
                 rel="noreferrer"
                 className="btn btn-ghost"
               >
-                GitHub ↗
+                View on GitHub ↗
               </a>
-              <Link href="/" className="btn btn-ghost">
+              <Link href="/" className="btn btn-white">
                 ← Home
               </Link>
             </div>
@@ -225,19 +215,16 @@ export function RepoView({ id }: { id: string }) {
 
         {repo.status === "pending" ? (
           <div className="status-box" role="status">
-            <strong>[QUEUED]</strong>
-            <span>
-              Waiting for worker slot — polling automatically every 2 seconds...
-            </span>
+            <strong>Queued for indexing</strong>
+            <span>Checking status automatically every 2 seconds...</span>
           </div>
         ) : null}
 
         {repo.status === "indexing" ? (
           <div className="status-box" role="status">
-            <strong>[INDEXING]</strong>
+            <strong>Indexing repository</strong>
             <span>
-              Streaming repository tarball, chunking source files, and embedding
-              768-D vectors into Neon pgvector...
+              Downloading tarball, chunking files, and generating embeddings...
             </span>
           </div>
         ) : null}
@@ -251,7 +238,7 @@ export function RepoView({ id }: { id: string }) {
               type="button"
               onClick={() => void handleRetry()}
               disabled={retrying}
-              className="btn btn-primary"
+              className="btn btn-white"
             >
               {retrying ? "Retrying..." : "Try again"}
             </button>
@@ -259,115 +246,98 @@ export function RepoView({ id }: { id: string }) {
         ) : null}
 
         {repo.status === "ready" ? (
-          <section className="upload-spotlight">
-            <div className="upload-spotlight-banner">
-              <div className="upload-banner-left">
-                <span className="upload-pulse-dot" aria-hidden="true" />
-                <span>
-                  INTERROGATION CONSOLE // ASK QUESTIONS ABOUT {repo.owner}/
-                  {repo.name}
-                </span>
-              </div>
-              <span className="upload-banner-right">STRICT CITATION MODE</span>
+          <section className="panel-card">
+            <div>
+              <span className="eyebrow-gold">Grounded Q&amp;A</span>
+              <h2 className="section-title">Ask CodeScout</h2>
+              <p className="section-sub">
+                Ask anything about <strong>{repo.owner}/{repo.name}</strong>.
+                Every answer cites exact <code>filePath:startLine-endLine</code>{" "}
+                chunks.
+              </p>
             </div>
 
-            <div className="upload-spotlight-body">
-              <div>
-                <h2 className="upload-title">Ask CodeScout</h2>
-                <p className="upload-sub">
-                  Every response is synthesized strictly from retrieved
-                  repository chunks and cites exact{" "}
-                  <code>filePath:startLine-endLine</code> sources.
-                </p>
+            <form onSubmit={handleAsk} className="stack" style={{ gap: 12 }}>
+              <label htmlFor="question-input" className="sr-only">
+                Ask a question about {repo.owner}/{repo.name}
+              </label>
+              <div className="pill-bar" style={{ maxWidth: "100%" }}>
+                <input
+                  id="question-input"
+                  ref={inputRef}
+                  type="text"
+                  value={question}
+                  onChange={(e) => setQuestion(e.target.value)}
+                  placeholder="Ask a question about this codebase..."
+                  maxLength={500}
+                  disabled={asking}
+                  className="pill-input"
+                  required
+                />
+                <button
+                  type="submit"
+                  disabled={asking || question.trim().length === 0}
+                  className="pill-submit-circle"
+                >
+                  {asking ? "Thinking..." : "Ask →"}
+                </button>
               </div>
 
-              <form onSubmit={handleAsk} className="form">
-                <label htmlFor="question-input" className="sr-only">
-                  Ask a question about {repo.owner}/{repo.name}
-                </label>
-                <div className="upload-input-group">
-                  <div className="upload-input-wrap">
-                    <span className="upload-input-prefix" aria-hidden="true">
-                      QUESTION ▸
-                    </span>
-                    <input
-                      id="question-input"
-                      ref={inputRef}
-                      type="text"
-                      value={question}
-                      onChange={(e) => setQuestion(e.target.value)}
-                      placeholder="e.g. How does data fetching work in this repo?"
-                      maxLength={500}
+              <div className="form-foot">
+                <div className="quick-fill-row" style={{ justifyContent: "flex-start" }}>
+                  <span className="quick-fill-label">Try:</span>
+                  {SAMPLE_QUESTIONS.map((sample) => (
+                    <button
+                      key={sample}
+                      type="button"
                       disabled={asking}
-                      className="upload-input"
-                      required
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={asking || question.trim().length === 0}
-                    className="btn-upload-cta"
-                  >
-                    {asking ? "Thinking..." : "Ask →"}
-                  </button>
-                </div>
-                <div className="form-foot">
-                  <div className="starter-row">
-                    <span className="upload-example-label">TRY PROMPT:</span>
-                    {SAMPLE_QUESTIONS.map((sample) => (
-                      <button
-                        key={sample}
-                        type="button"
-                        disabled={asking}
-                        onClick={() => setQuestion(sample)}
-                        className="starter-pill"
-                      >
-                        {sample}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="char-count muted">{question.length}/500</div>
-                </div>
-              </form>
-
-              {asking ? (
-                <div className="status-box" role="status">
-                  <strong>[RETRIEVING]</strong>
-                  <span>
-                    Embedding query, searching pgvector HNSW index, and
-                    generating cited answer...
-                  </span>
-                </div>
-              ) : null}
-
-              {askError ? (
-                <p className="error" role="alert">
-                  {askError}
-                </p>
-              ) : null}
-
-              {turns.length > 0 ? (
-                <div className="qa-list">
-                  {turns.map((turn) => (
-                    <AnswerCard
-                      key={turn.id}
-                      question={turn.question}
-                      response={turn.response}
-                    />
+                      onClick={() => setQuestion(sample)}
+                      className="quick-chip"
+                    >
+                      {sample}
+                    </button>
                   ))}
                 </div>
-              ) : (
-                <div className="empty-state">
-                  <p>
-                    <strong>No questions asked in this session yet.</strong>
-                  </p>
-                  <p className="muted">
-                    Type a question above or select a prompt pill to inspect
-                    cited source code chunks.
-                  </p>
-                </div>
-              )}
-            </div>
+                <div className="char-count">{question.length}/500</div>
+              </div>
+            </form>
+
+            {asking ? (
+              <div className="status-box" role="status">
+                <strong>Searching codebase</strong>
+                <span>
+                  Finding matching code chunks and preparing cited answer...
+                </span>
+              </div>
+            ) : null}
+
+            {askError ? (
+              <p className="error" role="alert">
+                {askError}
+              </p>
+            ) : null}
+
+            {turns.length > 0 ? (
+              <div className="qa-list">
+                {turns.map((turn) => (
+                  <AnswerCard
+                    key={turn.id}
+                    question={turn.question}
+                    response={turn.response}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <p>
+                  <strong>Ready for your first question.</strong>
+                </p>
+                <p>
+                  Type a question above or click a suggested prompt to see
+                  cited code excerpts.
+                </p>
+              </div>
+            )}
           </section>
         ) : null}
       </div>

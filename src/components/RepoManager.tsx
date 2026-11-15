@@ -85,104 +85,73 @@ export function RepoManager() {
 
   return (
     <div className="stack">
-      {/* ─── HIGH-VISIBILITY REPOSITORY UPLOAD / INGESTION CONSOLE ─── */}
-      <section className="upload-spotlight">
-        <div className="upload-spotlight-banner">
-          <div className="upload-banner-left">
-            <span className="upload-pulse-dot" aria-hidden="true" />
-            <span>
-              START HERE // PASTE PUBLIC GITHUB REPOSITORY URL TO UPLOAD &amp;
-              INDEX
-            </span>
-          </div>
-          <span className="upload-banner-right">
-            MODULE 01 // INGESTION CONSOLE
-          </span>
-        </div>
+      {/* ─── FRIENDLY CENTERED HERO + WHITE PILL UPLOAD BAR ─── */}
+      <section className="hero-centered">
+        <span className="eyebrow-gold">GITHUB CODEBASE INTELLIGENCE</span>
+        <h1 className="hero-title">
+          Understand any GitHub repo in plain English.
+        </h1>
+        <p className="hero-subtitle">
+          Paste any public repository URL below. CodeScout indexes the source
+          code into <strong>Neon pgvector</strong> and answers your questions
+          with exact <code>file:line</code> citations.
+        </p>
 
-        <div className="upload-spotlight-body">
-          <div className="upload-head-row">
-            <div>
-              <h2 className="upload-title">
-                Index a Public GitHub Repository
-              </h2>
-              <p className="upload-sub">
-                Enter any <code>https://github.com/owner/repo</code> URL below
-                — CodeScout streams, chunks, and embeds the codebase for instant
-                Q&amp;A.
-              </p>
-            </div>
-            <div className="upload-step-pills" aria-hidden="true">
-              <span className="upload-step-pill upload-step-pill-active">
-                1. PASTE URL
-              </span>
-              <span className="upload-step-pill">2. AUTO-INDEX</span>
-              <span className="upload-step-pill">3. ASK &amp; CITE</span>
-            </div>
+        <form onSubmit={handleSubmit} className="pill-form-wrap">
+          <div className="pill-bar">
+            <input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="Paste GitHub URL — e.g. https://github.com/owner/repo"
+              aria-label="GitHub repository URL"
+              className="pill-input"
+              disabled={submitting}
+              required
+            />
+            <button
+              type="submit"
+              className="pill-submit-circle"
+              disabled={submitting}
+            >
+              {submitting ? "Indexing..." : "Index repo →"}
+            </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="form">
-            <div className="upload-input-group">
-              <div className="upload-input-wrap">
-                <span className="upload-input-prefix" aria-hidden="true">
-                  GITHUB URL ▸
-                </span>
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://github.com/owner/repo"
-                  aria-label="GitHub repository URL"
-                  className="upload-input"
-                  disabled={submitting}
-                  required
-                />
-              </div>
+          <div className="quick-fill-row">
+            <span className="quick-fill-label">Try an example:</span>
+            {QUICK_REPOS.map((sampleUrl) => (
               <button
-                type="submit"
-                className="btn-upload-cta"
+                key={sampleUrl}
+                type="button"
                 disabled={submitting}
+                onClick={() => setUrl(sampleUrl)}
+                className="quick-chip"
               >
-                {submitting ? "Indexing..." : "Index repo →"}
+                {sampleUrl.replace("https://github.com/", "")}
               </button>
-            </div>
+            ))}
+          </div>
 
-            <div className="upload-helper-bar">
-              <div className="upload-examples">
-                <span className="upload-example-label">QUICK FILL:</span>
-                {QUICK_REPOS.map((sampleUrl) => (
-                  <button
-                    key={sampleUrl}
-                    type="button"
-                    disabled={submitting}
-                    onClick={() => setUrl(sampleUrl)}
-                    className="upload-example-chip"
-                  >
-                    {sampleUrl.replace("https://github.com/", "")}
-                  </button>
-                ))}
-              </div>
-              <span className="upload-hint">
-                Supports public GitHub repositories up to 50 MB
-              </span>
-            </div>
-
-            {submitError ? (
-              <p className="error" role="alert">
-                {submitError}
-              </p>
-            ) : null}
-          </form>
-        </div>
+          {submitError ? (
+            <p className="error" role="alert">
+              {submitError}
+            </p>
+          ) : null}
+        </form>
       </section>
 
-      {/* ─── INDEXED REPOSITORIES ARCHIVE ─── */}
-      <section className="panel-card">
-        <div className="panel-top-bar">
+      {/* ─── INDEXED REPOSITORIES LIST ─── */}
+      <section className="section-block">
+        <div className="section-header-row">
           <div>
-            <span className="index-badge-ink">
-              MODULE 02 // INDEXED REPOSITORIES ({repos.length})
-            </span>
+            <span className="eyebrow-gold">Your Workspace</span>
+            <h2 className="section-title">
+              Indexed Repositories ({repos.length})
+            </h2>
+            <p className="section-sub">
+              Select a ready repository to ask questions and inspect cited code.
+            </p>
           </div>
           <button
             type="button"
@@ -192,14 +161,6 @@ export function RepoManager() {
           >
             Refresh
           </button>
-        </div>
-
-        <div>
-          <h3 className="panel-title">Indexed Repositories</h3>
-          <p className="muted">
-            Click any ready repository below to open its grounded Q&amp;A
-            workspace.
-          </p>
         </div>
 
         {listError ? (
@@ -215,19 +176,16 @@ export function RepoManager() {
             <p>
               <strong>No repositories indexed yet.</strong>
             </p>
-            <p className="muted">
-              Paste a GitHub URL in the orange spotlight console above and click{" "}
-              <strong>Index repo</strong> to get started.
+            <p>
+              Paste any public GitHub URL in the bar above and click{" "}
+              <strong>Index repo →</strong> to get started.
             </p>
           </div>
         ) : (
           <ul className="repo-list">
-            {repos.map((repo, index) => (
-              <li key={repo.id} className="repo-row">
+            {repos.map((repo) => (
+              <li key={repo.id} className="repo-card">
                 <div className="repo-info">
-                  <span className="repo-index-num">
-                    [{String(index + 1).padStart(2, "0")}]
-                  </span>
                   <Link href={`/repos/${repo.id}`} className="repo-name">
                     {repo.owner}/{repo.name}
                   </Link>
@@ -235,15 +193,15 @@ export function RepoManager() {
                     <span className="status-dot" aria-hidden="true" />
                     {repo.status}
                   </span>
-                  <span className="meta-chip mono">
+                  <span className="meta-pill mono">
                     @{repo.commitSha.slice(0, 7)}
                   </span>
-                  <span className="meta-chip">
+                  <span className="meta-pill">
                     {repo.fileCount} files · {repo.chunkCount} chunks
                   </span>
                 </div>
                 <div className="repo-actions">
-                  <Link href={`/repos/${repo.id}`} className="btn btn-accent">
+                  <Link href={`/repos/${repo.id}`} className="btn btn-white">
                     Open Q&amp;A →
                   </Link>
                   <button

@@ -1,16 +1,16 @@
 import type { Metadata } from "next";
-import { Bricolage_Grotesque } from "next/font/google";
+import { Plus_Jakarta_Sans } from "next/font/google";
 import Link from "next/link";
 import "@/app/globals.css";
 
-const bricolage = Bricolage_Grotesque({
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-bricolage",
-  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-sans",
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
-  title: "CodeScout — Architectural Codebase RAG Engine | Muhammad Waleed",
+  title: "CodeScout — AI Codebase Intelligence & RAG | Muhammad Waleed",
   description:
     "Index any public GitHub repository into Neon pgvector and ask plain-English questions backed by exact file and line-range citations. Developed by Muhammad Waleed.",
 };
@@ -21,110 +21,108 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={bricolage.variable}>
+    <html lang="en" className={plusJakarta.variable}>
       <body>
         <div className="site-shell">
-          <header className="topbar">
-            <div className="topbar-inner">
-              <Link href="/" className="brand-link">
-                CODESCOUT<span className="brand-dot">.</span>
-              </Link>
-
+          <div className="nav-wrapper">
+            <header className="topbar-pill">
               <nav className="topbar-nav" aria-label="Primary navigation">
-                <a href="/#index-workspace" className="topbar-nav-link">
-                  01 / Indexer
+                <a href="/#indexer" className="topbar-nav-link">
+                  Indexer
                 </a>
-                <a href="/#pipeline" className="topbar-nav-link">
-                  02 / Architecture
+                <a href="/#how-it-works" className="topbar-nav-link">
+                  How It Works
                 </a>
                 <a href="/#use-cases" className="topbar-nav-link">
-                  03 / Use Cases
+                  Use Cases
                 </a>
               </nav>
 
+              <Link href="/" className="brand-link">
+                CODESCOUT
+              </Link>
+
               <div className="topbar-right">
-                <span className="status-tag">
-                  <span className="status-dot-live" aria-hidden="true" />
-                  PGVECTOR // 768D
+                <span className="status-pill-subtle">
+                  <span className="status-dot-gold" aria-hidden="true" />
+                  pgvector · 768d
                 </span>
-                <Link href="/" className="nav-cta">
-                  Workspace
+                <Link href="/" className="nav-cta-pill">
+                  Home
                 </Link>
               </div>
-            </div>
-          </header>
+            </header>
+          </div>
 
           <div className="page-body">{children}</div>
 
           <footer className="site-footer">
             <div className="footer-inner">
-              <div className="footer-top-grid">
-                <div>
-                  <span className="footer-kicker">
-                    [ SYSTEM COLOPHON // GROUNDED CODE INTELLIGENCE ]
-                  </span>
-                  <h2 className="footer-headline">
-                    ENGINEERED FOR ZERO-HALLUCINATION REPOSITORY Q&amp;A.
-                  </h2>
-                  <p className="footer-desc">
-                    CodeScout ingests public GitHub repositories via streaming
-                    tarballs, chunks source files with 1-based line preservation,
-                    indexes 768-dimensional embeddings in Neon Postgres
-                    (pgvector HNSW), and synthesizes answers strictly from cited
-                    source code.
-                  </p>
-                </div>
+              <div>
+                <div className="footer-brand-title">CODESCOUT</div>
+                <p className="footer-brand-desc">
+                  Grounded GitHub repository Q&amp;A — ask in plain English and
+                  verify every answer with line-exact code citations.
+                </p>
+              </div>
 
-                <div className="footer-meta-box">
-                  <div>
-                    <div className="footer-dev-label">
-                      ARCHITECT &amp; DEVELOPER
-                    </div>
-                    <div className="footer-dev-name">
-                      Developed by Muhammad Waleed
-                    </div>
-                    <div className="footer-dev-role">
-                      AI-First Full Stack Developer · Next.js · TypeScript · RAG
-                      Systems
-                    </div>
-                  </div>
-                  <div className="footer-links">
+              <div>
+                <div className="footer-col-title">Navigation</div>
+                <ul className="footer-col-list">
+                  <li>
+                    <a href="/#indexer">Index a Repository</a>
+                  </li>
+                  <li>
+                    <a href="/#how-it-works">How It Works</a>
+                  </li>
+                  <li>
+                    <a href="/#use-cases">Use Cases</a>
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <div className="footer-col-title">Technology</div>
+                <ul className="footer-col-list">
+                  <li>Neon Postgres + pgvector</li>
+                  <li>Gemini 768-D Embeddings</li>
+                  <li>Groq Grounded Synthesis</li>
+                  <li>GitHub Actions &amp; Docker</li>
+                </ul>
+              </div>
+
+              <div>
+                <div className="footer-col-title">Developed By</div>
+                <ul className="footer-col-list">
+                  <li className="footer-dev-highlight">Muhammad Waleed</li>
+                  <li>
                     <a
                       href="https://muhammad-waleed-kn.vercel.app/"
                       target="_blank"
                       rel="noreferrer"
-                      className="footer-link-btn"
                     >
                       Portfolio ↗
                     </a>
+                  </li>
+                  <li>
                     <a
-                      href="https://github.com/waleed-kn"
+                      href="https://github.com/waleed-kn/codeScout"
                       target="_blank"
                       rel="noreferrer"
-                      className="footer-link-btn"
                     >
                       GitHub ↗
                     </a>
+                  </li>
+                  <li>
                     <a
                       href="https://www.linkedin.com/in/muhammadwaleed111/"
                       target="_blank"
                       rel="noreferrer"
-                      className="footer-link-btn"
                     >
                       LinkedIn ↗
                     </a>
-                  </div>
-                </div>
-              </div>
-
-              <div className="footer-bottom-row">
-                <div className="footer-colophon">
-                  COLOPHON // EDITION 2026 — DESIGNED &amp; DEVELOPED BY
-                  MUHAMMAD WALEED (WALEED KN)
-                </div>
-                <div className="footer-watermark" aria-hidden="true">
-                  WALEED<span>.</span>
-                </div>
+                  </li>
+                </ul>
               </div>
             </div>
           </footer>
